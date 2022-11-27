@@ -21,11 +21,15 @@ let UnicodeObj: Record<string, string> = {};
  */
 let startUnicode = 0xea01;
 
+// use to skip reserved unicode with getNextUnicode
+let unicodeMapReverse: Record<string, string>;
+
 /**
  * SVG to SVG font
  */
 export function createSVG(options: SvgToFontOptions = {}): Promise<Record<string, string>> {
   startUnicode = options.startUnicode
+  unicodeMapReverse = options.unicodeMap ? Object.fromEntries(Object.entries(options.unicodeMap).map(([k, v]) => [v, k])) : {}
   UnicodeObj = {}
   return new Promise((resolve, reject) => {
     // init
@@ -38,7 +42,7 @@ export function createSVG(options: SvgToFontOptions = {}): Promise<Record<string
       // file name
       let _name = path.basename(svgPath, ".svg");
       const glyph = fs.createReadStream(svgPath) as ReadStream & { metadata: { unicode: string[], name: string } };
-      glyph.metadata = { unicode: getIconUnicode(_name, options.useNameAsUnicode), name: _name };
+      glyph.metadata = { unicode: getIconUnicode(_name, options.useNameAsUnicode, options.unicodeMap), name: _name };
       fontStream.write(glyph);
     }
 
@@ -135,12 +139,25 @@ export async function createTypescript(options: Omit<SvgToFontOptions, 'typescri
   log.log(`${color.green('SUCCESS')} Created ${DIST_PATH}`);
 }
 
+function getNextUnicode() {
+  // skip unicodeMap reserved unicodes
+  while (unicodeMapReverse && unicodeMapReverse[startUnicode]) {
+    startUnicode++
+  }
+  return startUnicode++
+}
+
 /*
  * Get icon unicode
  * @return {Array} unicode array
  */
-function getIconUnicode(name: string, useNameAsUnicode: boolean) {
-  let unicode = !useNameAsUnicode ? String.fromCharCode(startUnicode++) : name;
+function getIconUnicode(name: string, useNameAsUnicode: boolean, unicodeMap?: Record<string, string>) {
+  let unicode: string;
+  if (unicodeMap && unicodeMap[name]) {
+    unicode = unicodeMap[name];
+  } else {
+    unicode = !useNameAsUnicode ? String.fromCharCode(getNextUnicode()) : name;
+  }
   UnicodeObj[name] = unicode;
   return [unicode];
 }

@@ -104,6 +104,10 @@ export type SvgToFontOptions = {
    */
   useNameAsUnicode?: boolean;
   /**
+   * Custom unicode map (key: filename, value: unicode or name)
+   */
+  unicodeMap?: Record<string, string>
+  /**
    * Clear output directory contents
    * @default false
    */
