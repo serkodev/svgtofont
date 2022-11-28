@@ -2,6 +2,10 @@
   "name": "@serkodev/svgtofont",
   "version": "3.21.1",
   "description": "Converts SVG to TTF/EOT/WOFF/WOFF2/SVG format fonts.",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "homepage": "https://github.com/serkodev/svgtofont",
   "main": "lib/index.js",
   "bin": {
